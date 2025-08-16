@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.sqlite3
+db.sqlite3
+
+# Django migrations
+**/migrations/
+
+# Environment
+.env
+venv/
+env/
+*.env
+
+# IDEs & OS
+.vscode/
+.idea/
+.DS_Store
+
+# Static/media files
+staticfiles/
+media/
+
+# AWS / Render / EB config (optional)
+*.ebextensions/
+*.pem
