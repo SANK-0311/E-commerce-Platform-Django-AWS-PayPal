@@ -1,3 +1,31 @@
-<h1>
-    Your account has been successfully verified!
-</h1>
+
+
+{% include "store/base.html" %} 
+{% load static %} 
+{% block content %}
+<style>
+  body {
+    background-color: grey; /* Light background color */
+  }
+</style>
+
+<body>
+  <br />
+  <div class="container bg-white shadow-md p-5 form-layout">
+    <div class = "text-center">
+    <i class="fa fa-check fa-3x text-success" aria-hidden="true"></i>
+
+    </i>
+    <h4>
+      <storng> Your account has been successfully verified! </storng>
+    </h4>
+    <hr />
+    <p>Please proceed to login</p>
+    <a class="btn btn-success navbar-btn text-blue" type="button" href="/">
+            Login
+          </a>
+    </div>
+  </div>
+
+  {% endblock %}
+</body>

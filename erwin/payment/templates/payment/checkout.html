@@ -1,0 +1,240 @@
+{% include "store/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: gray;
+    }
+</style>
+
+<body>
+    <br>
+    <div class="container bg-white shadow-md p-5" style="width:500px; border-radius:20px;">
+        <form id="form" onsubmit="event.preventDefault();">
+            <div>
+                <h3> <i class="fa fa-chevron-circle-right" aria-hidden="true"></i> &nbsp; Complete your order </h3>
+                <p> Please enter in the relevant information below. </p>
+
+                <hr>
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="name" type="text" placeholder="Full name*" autocomplete="off" value="{{shipping.full_name}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="email" type="email" placeholder="Email address*" autocomplete="off" value="{{shipping.email}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="address1" type="text" placeholder="Address 1*" autocomplete="off" value="{{shipping.address1}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="address2" type="text" placeholder="Address 2*" autocomplete="off" value="{{shipping.address2}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="city" type="text" placeholder="City*" autocomplete="off" value="{{shipping.city}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="state" type="text" placeholder="State*" autocomplete="off" value="{{shipping.state}}" required>
+                </div>
+
+                <br>
+
+                <div class="form-field">
+                    <input class="form-control validate" id="zipcode" type="text" placeholder="Zip code*" autocomplete="off" value="{{shipping.zip_code}}" required>
+                </div>
+            </div>
+
+            <br>
+
+            <!-- PayPal button container -->
+            <div id="paypal-button-container"></div>
+        </form>
+    </div>
+
+    <br>
+</body>
+
+<!-- PayPal client ID integration -->
+<script src="https://www.paypal.com/sdk/js?client-id=AZmJIM_0ouYz-bxLAl8M1pl5ssoE_iB9OO-ljJCD4aFkyuMMVM7ZA2jbWKoIf758JY4Bb6obHXoWjvTA&currency=USD&intent=capture&enable-funding=venmo" data-sdk-integration-source="integrationbuilder"></script>
+
+<!-- jQuery (make sure this is included in your base template or add it here) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // Total price
+    var total_price = '{{cart.get_total}}';
+
+
+    // PayPal JS SDK 
+    const paypalButtonsComponent = paypal.Buttons({
+        // optional styling for buttons
+        style: {
+            color: "gold",
+            shape: "pill",
+            layout: "vertical"
+        },
+        
+        onInit: function(data, actions) {
+            // Initially disable the button
+            actions.disable();
+
+
+            
+            // Function to check if all required fields are filled
+            function checkInputs() {
+                let allFilled = true;
+
+                //Complete order - no shipping
+                
+                // Check all inputs with class 'validate' and required attribute
+                document.querySelectorAll('.validate[required]').forEach(function(input) {
+                    if (input.value.trim() === '') {
+                        allFilled = false;
+                    }
+                });
+                
+                return allFilled;
+            }
+            
+            // Check initial state (in case fields are pre-filled)
+            if (checkInputs()) {
+                actions.enable();
+            }
+            
+            // Add event listeners to all validate fields
+            document.querySelectorAll('.validate').forEach(item => {
+                // Listen for multiple events to catch all changes
+                ['keyup', 'change', 'blur'].forEach(eventType => {
+                    item.addEventListener(eventType, event => {
+                        // Check if all required fields are filled
+                        if (checkInputs()) {
+                            actions.enable();
+                        } else {
+                            actions.disable();
+                        }
+                    });
+                });
+            });
+
+            //Complete order - with shipping
+        },
+
+        // set up the transaction
+        createOrder: (data, actions) => {
+            // You might want to make this dynamic based on actual cart total
+            const createOrderPayload = {
+                purchase_units: [
+                    {
+                        amount: {
+                            value: total_price // Make this dynamic based on your cart total
+                        }
+                    }
+                ]
+            };
+
+            return actions.order.create(createOrderPayload);
+        },
+
+        // finalize the transaction
+        onApprove: (data, actions) => {
+            const captureOrderHandler = (details) => {
+                const payerName = details.payer.name.given_name;
+                console.log('Transaction completed by ' + payerName);
+
+
+                // Ajax funcnality
+                 $.ajax({
+              type: 'POST',
+              url: "{% url 'complete-order' %}",
+              data: {
+                  name: $('#name').val(),
+                  email: $('#email').val(),
+
+                  address1: $('#address1').val(),
+                  address2: $('#address2').val(),
+
+                  city: $('#city').val(),
+                  state: $('#state').val(),
+                  zip_code: $('#zip_code').val(),
+
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  action: 'POST'
+              },
+              success: function (json) {
+
+                  window.location.replace("{% url 'payment-success' %}");
+
+              },
+              error: function (xhr, errmsg, err) {
+                  window.location.replace("{% url 'payment-failed' %}");
+              }
+          });
+                
+                // Submit form data to your backend here
+                submitOrderToBackend(details);
+            };
+
+            return actions.order.capture().then(captureOrderHandler);
+        },
+
+        // handle unrecoverable errors
+        onError: (err) => {
+            console.error('An error prevented the buyer from checking out with PayPal:', err);
+            alert('An error occurred during checkout. Please try again.');
+        }
+    });
+
+    paypalButtonsComponent
+        .render("#paypal-button-container")
+        .catch((err) => {
+            console.error('PayPal Buttons failed to render:', err);
+        });
+
+    // Function to submit order data to backend after successful PayPal payment
+    function submitOrderToBackend(paypalDetails) {
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'complete-order' %}",
+            data: {
+                name: $('#name').val(),
+                email: $('#email').val(),
+                address1: $('#address1').val(),
+                address2: $('#address2').val(),
+                city: $('#city').val(),
+                state: $('#state').val(),
+                zipcode: $('#zipcode').val(), // Fixed: was zip_code
+                paypal_order_id: paypalDetails.id,
+                paypal_payer_email: paypalDetails.payer.email_address,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'POST'
+            },
+            success: function (json) {
+                window.location.replace("{% url 'payment-success' %}");
+            },
+            error: function (xhr, errmsg, err) {
+                console.error('Order submission failed:', err);
+                window.location.replace("{% url 'payment-failed' %}");
+            }
+        });
+    }
+</script>
+
+{% endblock %}

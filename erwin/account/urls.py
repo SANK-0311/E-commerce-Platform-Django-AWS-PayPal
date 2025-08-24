@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
@@ -14,15 +15,35 @@ urlpatterns = [
     path('email-verification/failed/', views.email_verification_failed, name='email-verification-failed'),
 
     
-    # Add other URL patterns here
-    # path('login/', views.login, name='login'),
-    # path('logout/', views.logout, name='logout'),
-    # path('profile/', views.profile, name='profile'),
-    # path('password_change/', views.password_change, name='password_change'),
-    # path('password_reset/', views.password_reset, name='password_reset'),
-    # path('password_reset/done/', views.password_reset_done, name='password_reset_done'),
-    # path('password_reset_confirm/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
-    # path('password_reset_complete/', views.password_reset_complete, name='password_reset_complete'),
-    # path('activate/<uidb64>/<token>/', views.activate, name='activate')   
+    #Login /Logout URLs
+    path('login/', views.my_login, name='login'),
+    path('user-logout/', views.user_logout, name='user-logout'),
+
+
+#Dashboard and Profile URLs
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/', views.profile, name='profile'),
+    path('delete-account/', views.delete_account, name='delete-account'),
+
+
+    #password management URLs/views
+    # 1) Submit our email form
+    path('reset_password/', auth_views.PasswordResetView.as_view(template_name = 'account/password/password-reset.html'), name='reset_password'),
+
+    # 2) Success message stating that a password reset email was sent
+    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(template_name = 'account/password/password-reset-sent.html'), name='password_reset_done'),
+
+    # 3) Password reset link with uidb64 and token
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name = 'account/password/password-reset-form.html'), name='password_reset_confirm'),
+
+    # 4) Success message stating that the password has been reset
+    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(template_name = 'account/password/password-reset-complete.html'), name='password_reset_complete'),
+
+
+
+    #Manage shipping urls
+    path('manage-shipping/', views.manage_shipping, name='manage-shipping'),
+
+    path('track-orders/',views.track_orders,name = 'track-orders')
 
 ]

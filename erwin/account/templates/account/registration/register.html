@@ -24,7 +24,7 @@
         <h5>
             Purchase your favorite products from the comfort of your home.
         </h5>
-        <br/>
+        <hr>
         <br/>
         <form method = "POST" autocomplete = "off">
             {% csrf_token %}
@@ -37,15 +37,18 @@
             <br/>
             <br/>
 
-            <button type = "submit" class = "btn btn-primary"> &nbsp;
+            <button type = "submit" class = "btn btn-primary w-100 p-2"> &nbsp;
                 
                 Register
             </button>
+            <br/> <br/> 
+            <div class = "text-center">
+                <a href="{% url 'login' %}"> Already have an account? Login here. </a>
+            </div>
+            
         </form>
     </div>
 </body>
 <br/>
-<br/>
-
-
+<br/> 
 {% endblock %}

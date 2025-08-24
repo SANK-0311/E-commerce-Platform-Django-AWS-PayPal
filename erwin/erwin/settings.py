@@ -11,21 +11,31 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
+import environ
+import os
+# Define BASE_DIR first!
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
+
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ke5_!fae-g1%%%%wggm6gratg^nf9w1!i%6+g$ij$c^scv4d1p"
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+#CSRF_TRUSTED_ORIGINS = ['']
 
 
 # Application definition
@@ -42,9 +52,13 @@ INSTALLED_APPS = [
     "cart", #Django app for cart functionality
     'mathfilters', #Django app for math filters
     'account', #Django app for user accounts
+    'payment', #Django app for payment processing
+
+
     'crispy_forms', #Django app for crispy forms
     'crispy_bootstrap4', #Django app for crispy forms with bootstrap4
     'crispy_bootstrap5', #Django app for crispy forms with bootstrap5
+    'storages',
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = 'bootstrap5' #Setting crispy forms to use bootstrap4
@@ -84,14 +98,14 @@ WSGI_APPLICATION = "erwin.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
+# '''
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+# '''
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -151,7 +165,52 @@ EMAIL_USE_TLS = True
 # Be sure to set these to your actual email and password
 # If you are using Gmail, you may need to allow "less secure apps" in your Google account settings.
 # Alternatively, you can use an App Password if you have 2-Step Verification enabled.
-# See: https://support.google.com/accounts/answer/185201?hl=en
 
-EMAIL_HOST_USER = 'samplegmail.com' #Your email address
-EMAIL_HOST_PASSWORD = 'sample$password' #Your email password
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+
+#Allow Paypal Popups
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same_origin-allow-popups'
+
+
+
+#AWS CONFIGURATION
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+
+#Amazon S3 Integration
+
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME') #ENTER THE S3 BUCKET NAME HERE
+
+
+#DJANGO 4.2 > STORAGE CONFIGURATION FOR S3
+STORAGES = {
+    #Media file (image) management
+    "default" : {
+        "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+    },
+
+    #CSS and JS file management
+    "staticfiles" : {
+        "BACKEND" : "storages.backends.s3boto3.S3StaticStorage",
+    },    
+}
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+
+AWS_S3_FILE_OVERWRITE = False
+
+#RDS (DATABASES) CONFIGURATION SETTINGS: -->RDS - RELATIONAL DATABASES
+DATABASES = {
+    'default' : {
+        'ENGINE' : 'django.db.backends.postgresql',
+        'NAME' : env('DB_NAME'),
+        'USER' : env('DB_USER'),
+        'PASSWORD' : env('DB_PASSWORD'),
+        'HOST' : env('DB_HOST'),
+        'PORT' : '5432',
+    }
+}
+
