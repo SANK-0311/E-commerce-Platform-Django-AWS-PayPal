@@ -28,14 +28,14 @@ environ.Env.read_env()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['erwiq.com','www.erwiq.com','*']
 
-#CSRF_TRUSTED_ORIGINS = ['']
+CSRF_TRUSTED_ORIGINS = ['https://erwiq.com','https://www.erwiq.com']
 
 
 # Application definition
@@ -166,8 +166,8 @@ EMAIL_USE_TLS = True
 # If you are using Gmail, you may need to allow "less secure apps" in your Google account settings.
 # Alternatively, you can use an App Password if you have 2-Step Verification enabled.
 
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 #Allow Paypal Popups
@@ -177,12 +177,12 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same_origin-allow-popups'
 
 
 #AWS CONFIGURATION
-AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 #Amazon S3 Integration
 
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME') #ENTER THE S3 BUCKET NAME HERE
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME') #ENTER THE S3 BUCKET NAME HERE
 
 
 #DJANGO 4.2 > STORAGE CONFIGURATION FOR S3
@@ -206,10 +206,10 @@ AWS_S3_FILE_OVERWRITE = False
 DATABASES = {
     'default' : {
         'ENGINE' : 'django.db.backends.postgresql',
-        'NAME' : env('DB_NAME'),
-        'USER' : env('DB_USER'),
-        'PASSWORD' : env('DB_PASSWORD'),
-        'HOST' : env('DB_HOST'),
+        'NAME' : os.environ.get('NAME'),
+        'USER' : os.environ.get('USER'),
+        'PASSWORD' : os.environ.get('PASSWORD'),
+        'HOST' : os.environ.get('HOST'),
         'PORT' : '5432',
     }
 }
